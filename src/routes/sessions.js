@@ -3,6 +3,7 @@ import { Session } from '../models/Session.js';
 import { User } from '../models/User.js';
 import { authenticate } from '../middleware/auth.js';
 import { generateFinalReport } from '../services/aiService.js';
+import { getWeakestDimensions, getResourcesForDimensions } from '../services/resourceService.js';
 
 const router = Router();
 router.use(authenticate);
@@ -176,7 +177,14 @@ router.post('/:id/end', async (req, res) => {
       xpPayload = { xp_earned: xpEarned, new_badges: newBadges, user_xp: newXP, user_level: newLevel, leveled_up: leveledUp, goals_completed: goalsCompleted };
     }
 
-    res.json(fmt(session, xpPayload));
+    let recommended_resources = [];
+    if (report?.scores) {
+      const weakDims = getWeakestDimensions(report.scores, 3);
+      const level = xpPayload.user_level || req.user?.level || 1;
+      recommended_resources = getResourcesForDimensions(weakDims, level);
+    }
+
+    res.json({ ...fmt(session, xpPayload), recommended_resources });
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }

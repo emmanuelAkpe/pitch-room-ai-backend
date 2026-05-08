@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './src/config/database.js';
 import authRouter from './src/routes/auth.js';
 import sessionsRouter from './src/routes/sessions.js';
+import resourcesRouter from './src/routes/resources.js';
 import { handleAudioWebSocket } from './src/websocket/audioHandler.js';
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/auth', authRouter);
 app.use('/sessions', sessionsRouter);
+app.use('/resources', resourcesRouter);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 wss.on('connection', handleAudioWebSocket);
